@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -52,16 +53,23 @@ func main() {
 
 	winningValue := 0
 
+	var winningBoards = []board{}
+	lastWinningIndex := 0
 	for i := 4; i < len(drawnNumbers); i++ {
 		for _, board := range boards {
+			if boardArrayContains(winningBoards, board) {
+				continue
+			}
+
 			if checkBoardForWin(board, drawnNumbers[0:i]) {
-				winningValue = getWinningBoardValue(board, drawnNumbers[0:i])
-				fmt.Print(winningValue * drawnNumbers[i-1])
-				return
+				winningBoards = append(winningBoards, board)
+				lastWinningIndex = i
 			}
 		}
 	}
 
+	winningValue = getWinningBoardValue(winningBoards[len(winningBoards)-1], drawnNumbers[0:lastWinningIndex])
+	fmt.Print(winningValue * drawnNumbers[lastWinningIndex-1])
 }
 
 // Sum all found numbers and deduct this from sum of all numbers
@@ -87,7 +95,7 @@ func getWinningBoardValue(b board, numbers []int) int {
 func checkBoardForWin(b board, numbers []int) bool {
 	// Check rows first
 	for _, row := range b.numbers {
-		if contains(numbers, row) {
+		if intArrayContains(numbers, row) {
 			return true
 		}
 	}
@@ -101,7 +109,7 @@ func checkBoardForWin(b board, numbers []int) bool {
 	}
 
 	for _, col := range cols {
-		if contains(numbers, col[:]) {
+		if intArrayContains(numbers, col[:]) {
 			return true
 		}
 	}
@@ -109,7 +117,18 @@ func checkBoardForWin(b board, numbers []int) bool {
 	return false
 }
 
-func contains(a []int, b []int) bool {
+// Does b exist in a
+func boardArrayContains(a []board, b board) bool {
+	for _, aBoard := range a {
+		if reflect.DeepEqual(aBoard, b) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func intArrayContains(a []int, b []int) bool {
 	var found = []int{}
 
 	for _, av := range a {

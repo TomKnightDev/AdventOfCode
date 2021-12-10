@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -35,6 +36,7 @@ func main() {
 	count := 0
 	for _, val := range coordDic {
 		if val.count > 0 {
+			// fmt.Print(val)
 			count++
 		}
 	}
@@ -49,20 +51,6 @@ func getCoords(s string) {
 	start := strings.Split(vals[0], ",")
 	end := strings.Split(vals[1], ",")
 
-	matchX := -1
-	matchY := -1
-	if start[0] == end[0] {
-		v, err := strconv.Atoi(start[0])
-		check(err)
-		matchX = v
-	} else if start[1] == end[1] {
-		v, err := strconv.Atoi(start[1])
-		check(err)
-		matchY = v
-	} else {
-		return
-	}
-
 	// sort.Strings(start)
 	startx, startxErr := strconv.Atoi(start[0])
 	check(startxErr)
@@ -75,6 +63,75 @@ func getCoords(s string) {
 	endy, endyErr := strconv.Atoi(end[1])
 	check(endyErr)
 
+	matchX := -1
+	matchY := -1
+	if startx == endx {
+		matchX = startx
+	} else if starty == endy {
+		matchY = starty
+	} else if startx == starty && endx == endy {
+		for i := 0; i <= int(math.Abs(float64(startx)-float64(endx))); i++ {
+			if !containsCoord(coords{x: i, y: i}) {
+				coordDic = append(coordDic, coords{x: i, y: i})
+			}
+		}
+		return
+	} else if startx == endy && starty == endx {
+		for i := 0; i <= int(math.Abs(float64(startx)-float64(starty))); i++ {
+			if !containsCoord(coords{x: startx - i, y: i}) {
+				coordDic = append(coordDic, coords{x: startx - i, y: i})
+			}
+		}
+		return
+	} else if math.Abs(float64(startx-endx)) == math.Abs(float64(starty-endy)) {
+		count := int(math.Abs(float64(startx) - float64(endx)))
+
+		xIncrease := startx < endx
+		yIncrease := starty < endy
+
+		for i := 0; i <= count; i++ {
+			xCount := i
+			if !xIncrease {
+				xCount = -i
+			}
+			yCount := i
+			if !yIncrease {
+				yCount = -i
+			}
+
+			if !containsCoord(coords{x: startx + xCount, y: starty + yCount}) {
+				coordDic = append(coordDic, coords{x: startx + xCount, y: starty + yCount})
+			}
+		}
+		return
+	} else if startx == starty || endx == endy {
+		xIncrease := startx < endx
+		yIncrease := starty < endy
+
+		iCount := int(math.Abs(float64(startx) - float64(endx)))
+		if iCount == 0 {
+			iCount = int(math.Abs(float64(starty) - float64(endy)))
+		}
+
+		for i := 0; i <= iCount; i++ {
+			xCount := i
+			if !xIncrease {
+				xCount = -i
+			}
+			yCount := i
+			if !yIncrease {
+				yCount = -i
+			}
+
+			if !containsCoord(coords{x: startx + xCount, y: starty + yCount}) {
+				coordDic = append(coordDic, coords{x: startx + xCount, y: starty + yCount})
+			}
+		}
+
+	} else {
+		return
+	}
+
 	if matchY >= 0 {
 		if startx > endx {
 			t := startx
@@ -86,7 +143,7 @@ func getCoords(s string) {
 				coordDic = append(coordDic, coords{x: i, y: matchY})
 			}
 		}
-	} else {
+	} else if matchX >= 0 {
 		if starty > endy {
 			t := starty
 			starty = endy

@@ -13,6 +13,8 @@ func check(e error) {
 }
 
 func main() {
+	mainPart2()
+	return
 	data, err := os.ReadFile("input.txt")
 	check(err)
 
@@ -37,4 +39,39 @@ func main() {
 	}
 
 	fmt.Println(count)
+}
+
+func getInputValues(fileName string) []string {
+	stringLines := readFromFile(fileName)
+	var vals = []string{}
+
+	for _, line := range stringLines {
+		stringVals := strings.SplitN(line, " | ", -1)
+		vals = append(vals, stringVals[0])
+	}
+
+	return vals
+}
+
+func getOutputValues(fileName string) []string {
+	stringLines := readFromFile(fileName)
+	var vals = []string{}
+
+	for _, line := range stringLines {
+		stringVals := strings.SplitAfterN(line, " | ", 2)
+		vals = append(vals, stringVals[1])
+
+		// for _, val := range stringVals {
+		// 	vals = strings.Split(val, " ")
+		// }
+	}
+
+	return vals
+}
+
+func readFromFile(fileName string) []string {
+	data, err := os.ReadFile(fileName)
+	check(err)
+
+	return strings.Split(string(data), "\n")
 }
